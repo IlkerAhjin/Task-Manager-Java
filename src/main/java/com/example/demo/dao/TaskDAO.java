@@ -83,9 +83,7 @@ public class TaskDAO {
         }
     }
 
-    public void markTaskAsDone(int taskChoice) {
-        Task taskTodone = currentTasks.get(taskChoice - 1);
-        int dbId = taskTodone.getId();
+    public void markTaskAsDone(int dbId) {
         String sql = "UPDATE tasks SET is_done = ? WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -97,9 +95,7 @@ public class TaskDAO {
         }
     }
 
-    public void markTaskAsUndone(int taskChoice) {
-        Task taskToUndone = currentTasks.get(taskChoice - 1);
-        int dbId = taskToUndone.getId();
+    public void markTaskAsUndone(int dbId) {
         String sql = "UPDATE tasks SET is_done = ? WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -111,9 +107,7 @@ public class TaskDAO {
         }
     }
 
-    public void deleteTask(int taskChoice) {
-        Task taskToDelete = currentTasks.get(taskChoice - 1);
-        int dbId = taskToDelete.getId();
+    public void deleteTask(int dbId) {
         String sql = "DELETE FROM tasks WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
