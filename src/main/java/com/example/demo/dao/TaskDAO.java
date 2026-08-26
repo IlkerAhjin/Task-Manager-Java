@@ -4,16 +4,15 @@ import com.example.demo.DatabaseManager;
 import com.example.demo.DeadlineTask;
 import com.example.demo.Task;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TaskDAO {
     private final ArrayList<Task> currentTasks = new ArrayList<>();
-
+    private final ArrayList<DeadlineTask> deadlineTasks = new ArrayList<>();
     public void addTask(Task task, int userID) {
         String sql = "INSERT INTO tasks (user_id, task_type, title, description, is_done, deadline_date,priority,kategorie) VALUES (?, ?, ?, ?, ?, ?,?,?)";
         try (Connection conn = DatabaseManager.getConnection();
@@ -134,7 +133,8 @@ public class TaskDAO {
         return 0;
     }
 
-    public void searchTasks(String keyword, int userID) {
+    public ArrayList<Task> searchTasks(String keyword, int userID) {
+        currentTasks.clear();
         String sql = "SELECT * FROM tasks WHERE user_id = ? AND title LIKE ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -142,14 +142,17 @@ public class TaskDAO {
             pstmt.setString(2, "%" + keyword + "%");
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                buildTask(rs);
+                Task fertigerTask = buildTask(rs);
+                currentTasks.add(fertigerTask);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return currentTasks;
     }
 
-    public void filterTasks(boolean status, int userID) {
+    public ArrayList<Task> filterTasks(boolean status, int userID) {
+        currentTasks.clear();
         String sql = "SELECT * FROM tasks WHERE user_id = ? AND is_done = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -157,46 +160,52 @@ public class TaskDAO {
             pstmt.setBoolean(2, status);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                buildTask(rs);
+                currentTasks.add(buildTask(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return currentTasks;
     }
 
-    public void sortTasksAlphabetically(int userID) {
+    public ArrayList<Task> sortTasksAlphabetically(int userID) {
+        currentTasks.clear();
         String sql = "SELECT * FROM tasks WHERE user_id = ? ORDER BY title ASC";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userID);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                buildTask(rs);
+                currentTasks.add(buildTask(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return currentTasks;
     }
 
-    public void showDeadlinesSorted(int userID) {
+    public ArrayList<Task> showDeadlinesSorted(int userID) {
+        currentTasks.clear();
         String sql = "SELECT * FROM tasks WHERE user_id = ? AND task_type = 'DEADLINE' ORDER BY deadline_date ASC";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userID);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                buildTask(rs);
+                currentTasks.add(buildTask(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return currentTasks;
     }
 
-    public void showDashboard(int userID) {
+    public Map<String, Integer> showDashboard(int userID) {
         int totalCount = 0;
         int doneCount = 0;
         int openCount = 0;
         int overdueCount = 0;
+        Map<String, Integer> dashboardStats = new HashMap<>();
         String sql = "SELECT * FROM tasks WHERE user_id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -223,12 +232,11 @@ public class TaskDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        System.out.println("=== YOUR DASHBOARD ===\n" +
-                "Total Tasks: " + totalCount + "\n" +
-                "Completed:   " + doneCount + "\n" +
-                "Open:        " + openCount + "\n" +
-                "OVERDUE:     " + overdueCount + "\n" +
-                "======================");
+        dashboardStats.put("Total Tasks",totalCount);
+        dashboardStats.put("Completed",doneCount);
+        dashboardStats.put("Open", openCount);
+        dashboardStats.put("OVERDUE", overdueCount);
+        return dashboardStats;
     }
 
     private Task buildTask(ResultSet rs) throws SQLException {

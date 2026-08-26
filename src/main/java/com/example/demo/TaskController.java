@@ -4,6 +4,7 @@ import com.example.demo.dao.TaskDAO;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -33,5 +34,29 @@ public class TaskController {
     @PutMapping("/{id}/undone")
     public void markTaskAsUndone(@PathVariable int id) {
         taskDAO.markTaskAsUndone(id);
+    }
+
+    @GetMapping("/search")
+    public List<Task> searchTask(@RequestHeader("User-Id") int userid,@RequestParam String keyword){
+        return taskDAO.searchTasks(keyword, userid);
+    }
+
+    @GetMapping("/filter")
+    public List<Task> filterTask(@RequestHeader("User-Id") int userid,@RequestParam boolean status){
+        return taskDAO.filterTasks(status, userid);
+    }
+
+    @GetMapping("/sortTask")
+    public List<Task> sortTask(@RequestHeader("User-Id") int userid){
+        return taskDAO.sortTasksAlphabetically(userid);
+    }
+
+    @GetMapping("/sortdeadlinetask")
+    public List<Task> sortDeadlineTask(@RequestHeader("User-Id") int userid){
+        return taskDAO.showDeadlinesSorted(userid);
+    }
+    @GetMapping("/dashboard")
+    public Map<String, Integer> dashboard(@RequestHeader("User-Id" ) int userid){
+        return taskDAO.showDashboard(userid);
     }
 }
