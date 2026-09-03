@@ -1,6 +1,5 @@
 package com.example.demo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class User {
@@ -17,9 +16,6 @@ public class User {
         this.username = username;
         this.email = email;
         this.password = password;
-    }
-    public TaskManager getTaskManager() {
-        return taskManager;
     }
     public String getUsername() {
         return username;
