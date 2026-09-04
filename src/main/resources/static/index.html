@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>To-Do List</title>
 </head>
 
+
+
 <style>
+
     .login-box {
         background-color: #f4f4f4;
         width: 300px;
@@ -13,19 +16,121 @@
         padding: 20px;
         border-radius: 8px;
     }
+
     .login-box input, .login-box button {
         width: 100%;
         margin-bottom: 15px;
     }
+
+    .dashboard-box{
+        background-color: #f4f4f4;
+        width: 300px;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 8px;
+        display: none;
+    }
+
+    .Add-Task{
+        background-color: #f4f4f4;
+        width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 8px;
+        display: none;
+    }
+
+
 </style>
+
+
+
+
+
+
 <body>
-<div class="login-box">
+<div class="login-box" id="login-box">
     <h2>Login</h2>
     <input type="text" id="username" placeholder="Username">
     <input type="password" id="password" placeholder="Password">
     <button onclick="loginUser()">Login</button>
+
 </div>
+<div class="dashboard-box" id="dashboard-box">
+    <h2>Dashboard</h2>
+    <span id="userNameDisplay"></span>
+    <h3 id="dashboardText"></h3>
+</div>
+<div class="Add-Task" id="Add-Task">
+    <input type="text" id="TaskName" placeholder="Task name: ">
+    <input type="text" id="Desc" placeholder="Task description: ">
+    <select id="TaskType">
+        <option value="NORMAL">NORMAL</option>
+        <option value="DEADLINE">DEADLINE</option>
+    </select>
+    <select id="Status">
+        <option value="true">true</option>
+        <option value="false">false</option>
+    </select>
+    <select id="PRIORITY">
+        <option id="HIGH" value="HIGH">HIGH</option>
+        <option id="MEDIUM" value="MEDIUM">MEDIUM</option>
+        <option id="LOW" value="LOW" >LOW</option>
+    </select>
+    <select id="Kategorie">
+        <option id="WORK" value="WORK">WORK</option>
+        <option id="PERSONAL" value="PERSONAL">PERSONAL</option>
+        <option id="SCHOOL" value="SCHOOL" >SCHOOL</option>
+    </select>
+    <label for="TaskDate">Only DeadlineTask: </label>
+    <input type="date" id="TaskDate" placeholder="Till when ?"
+    min="">
+    <h4 id="successfull"></h4>
+    <button onclick="addTask()">Add Task</button>
+</div>
+
+
+
+
+
+
+
 <script>
+    const heute = new Date();
+
+    const year = String(heute.getFullYear());
+    const month = String(heute.getMonth()+1).padStart(2, '0');
+    const day = String(heute.getDate()).padStart(2, '0');
+
+    const datumsString = `${year}-${month}-${day}`;
+
+    document.getElementById("TaskDate").min = datumsString;
+    function addTask(){
+        let TN = document.getElementById("TaskName").value;
+        let desc = document.getElementById("Desc").value;
+        let status = document.getElementById("Status").value;
+        let priority = document.getElementById("PRIORITY").value;
+        let kategorie = document.getElementById("Kategorie").value;
+        let Tasktype = document.getElementById("TaskType").value;
+        let id = sessionStorage.getItem("userId")
+        let date = document.getElementById("TaskDate").value;
+        let TaskData = {title: TN ,description: desc,task_type:Tasktype,done: status,date:date, priority: priority,kategorie:kategorie}
+        fetch("http://localhost:8080/api/tasks/add", {
+            method: "POST",
+            headers: {
+                "User-Id":id,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(TaskData)
+        }).then(response => {
+            if (response.status === 200) {
+                document.getElementById("successfull").innerText = "Task Added";
+            } else {
+                document.getElementById("successfull").innerText = "Something went wrong";
+            }
+        })
+    }
+
 function loginUser(){
     let user = document.getElementById("username").value;
     let pass = document.getElementById("password").value;
@@ -38,12 +143,35 @@ function loginUser(){
     body: JSON.stringify(loginData)
     }).then(response => {
         if (response.status === 200) {
+            document.getElementById("login-box").style.display = "none";
             console.log("Login successfully");
+            document.getElementById("dashboard-box").style.display = "block";
+            document.getElementById("Add-Task").style.display = "block";
+            response.json().then(data => {
+                document.getElementById("userNameDisplay").innerText = "Hello, " + data.username
+                sessionStorage.setItem("userId", data.id);
+
+            dashboardUser(data.id).then(dashboardData => {
+                document.getElementById("dashboardText").innerHTML = "Total Tasks: " + dashboardData["Total Tasks"] +
+                    '<br>' + "Completed: " + dashboardData["Completed"] + '<br>' + "Open: " + dashboardData["Open"]
+                    + '<br>' + "OVERDUE: " + dashboardData["OVERDUE"];
+            })
+        })
         } else if (response.status === 401) {
         console.log("Login failed");
         }
     });
 }
+    function dashboardUser(id){
+
+        return fetch("http://localhost:8080/api/tasks/dashboard", {
+            method:"GET",
+            headers: {
+                "User-Id": id
+            }
+        }).then(response => response.json());
+    }
+
 </script>
 </body>
 </html>

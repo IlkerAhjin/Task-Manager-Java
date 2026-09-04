@@ -1,5 +1,10 @@
+
 package com.example.demo;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "task_type")
+@JsonSubTypes({@JsonSubTypes.Type(value = Task.class,name = "NORMAL"),@JsonSubTypes.Type( value = DeadlineTask.class, name = "DEADLINE")})
 public class Task {
     private String title;
     private String description;

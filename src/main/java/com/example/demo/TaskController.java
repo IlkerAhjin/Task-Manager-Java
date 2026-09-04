@@ -16,7 +16,7 @@ public class TaskController {
         return taskDAO.showAllTasks(userId);
     }
 
-    @PostMapping
+    @PostMapping("/add")
     public void createTask(@RequestBody Task newTask, @RequestHeader("User-Id") int userId) {
         taskDAO.addTask(newTask, userId);
     }
