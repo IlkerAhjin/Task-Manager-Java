@@ -5,106 +5,423 @@
     <title>To-Do List</title>
 </head>
 
-
-
 <style>
+    :root {
+        --notion-bg: #ffffff;
+        --notion-text: #37352f;
+        --notion-muted: #787774;
+        --notion-border: #e9e9e7;
+        --notion-sidebar: #f7f6f3;
+        --notion-hover: #efeeea;
+        --notion-card: #ffffff;
+        --notion-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
 
-    .login-box {
-        background-color: #f4f4f4;
-        width: 300px;
-        margin: 50px auto;
-        padding: 20px;
-        border-radius: 8px;
+        --prio-high-bg: rgba(235, 87, 87, 0.08);
+        --prio-high-border: rgba(235, 87, 87, 0.35);
+        --prio-med-bg: rgba(226, 155, 37, 0.08);
+        --prio-med-border: rgba(226, 155, 37, 0.35);
+        --prio-low-bg: rgba(46, 124, 86, 0.08);
+        --prio-low-border: rgba(46, 124, 86, 0.35);
     }
 
-    .login-box input, .login-box button {
+    body.dark-mode {
+        --notion-bg: #191919;
+        --notion-text: #d4d4d4;
+        --notion-muted: #9b9a97;
+        --notion-border: #2f2f2f;
+        --notion-sidebar: #202020;
+        --notion-hover: #2c2c2c;
+        --notion-card: #252525;
+
+        --prio-high-bg: rgba(235, 87, 87, 0.16);
+        --prio-high-border: rgba(235, 87, 87, 0.45);
+        --prio-med-bg: rgba(226, 155, 37, 0.16);
+        --prio-med-border: rgba(226, 155, 37, 0.45);
+        --prio-low-bg: rgba(46, 124, 86, 0.16);
+        --prio-low-border: rgba(46, 124, 86, 0.45);
+    }
+
+    .task-card {
+        padding: 14px 16px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .prio-HIGH {
+        background: rgba(235, 87, 87, 0.08);
+        border: 1px solid rgba(235, 87, 87, 0.25);
+    }
+
+    .prio-MEDIUM {
+        background: rgba(226, 155, 37, 0.08);
+        border: 1px solid rgba(226, 155, 37, 0.25);
+    }
+
+    .prio-LOW {
+        background: rgba(46, 124, 86, 0.08);
+        border: 1px solid rgba(46, 124, 86, 0.25);
+    }
+
+    .task-priority-high,
+    .priority-high {
+        background: rgba(239, 68, 68, 0.12);
+        border-left: 4px solid rgba(239, 68, 68, 0.6);
+        border-top: 1px solid rgba(239, 68, 68, 0.2);
+        border-right: 1px solid rgba(239, 68, 68, 0.2);
+        border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .task-priority-medium,
+    .priority-medium {
+        background: rgba(245, 158, 11, 0.12);
+        border-left: 4px solid rgba(245, 158, 11, 0.6);
+        border-top: 1px solid rgba(245, 158, 11, 0.2);
+        border-right: 1px solid rgba(245, 158, 11, 0.2);
+        border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .task-priority-low,
+    .priority-low {
+        background: rgba(59, 130, 246, 0.12);
+        border-left: 4px solid rgba(59, 130, 246, 0.6);
+        border-top: 1px solid rgba(59, 130, 246, 0.2);
+        border-right: 1px solid rgba(59, 130, 246, 0.2);
+        border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    body {
+        background-color: var(--notion-bg);
+        color: var(--notion-text);
+        font-family: var(--notion-font);
+        margin: 0;
+        padding: 40px 20px;
+        -webkit-font-smoothing: antialiased;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .theme-toggle-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        font-family: var(--notion-font);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--notion-text);
+        background: var(--notion-card);
+        border: 1px solid var(--notion-border);
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(15, 15, 15, 0.05);
+        z-index: 1000;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .theme-toggle-btn:hover {
+        background: var(--notion-sidebar);
+        border-color: #d3d1cb;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 16px;
+        letter-spacing: -0.01em;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 14px;
+        color: var(--notion-text);
+    }
+
+    h4 {
+        margin: 10px 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #2e7c56;
+    }
+
+    input, select, textarea {
+        font-family: var(--notion-font);
+        font-size: 14px;
+        color: var(--notion-text);
+        background: var(--notion-card);
+        border: 1px solid var(--notion-border);
+        border-radius: 4px;
+        padding: 8px 10px;
+        box-sizing: border-box;
+        outline: none;
+        transition: border 0.15s ease, background 0.15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-color: #2383e2;
+        box-shadow: 0 0 0 2px rgba(35, 131, 226, 0.15);
+    }
+
+    button {
+        font-family: var(--notion-font);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--notion-text);
+        background: var(--notion-card);
+        border: 1px solid var(--notion-border);
+        border-radius: 4px;
+        padding: 6px 12px;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(15, 15, 15, 0.05);
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    button:hover {
+        background: var(--notion-sidebar);
+        border-color: #d3d1cb;
+    }
+
+    button:active {
+        background: var(--notion-hover);
+    }
+
+    .login-box, .Register-box {
+        background-color: var(--notion-card);
+        width: 340px;
+        margin: 80px auto;
+        padding: 28px;
+        border-radius: 6px;
+        border: 1px solid var(--notion-border);
+        box-shadow: 0 4px 12px rgba(15, 15, 15, 0.05);
+    }
+
+    .login-box input, .login-box button,
+    .Register-box input, .Register-box button {
         width: 100%;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
 
-    .dashboard-box{
-        background-color: #f4f4f4;
-        width: 300px;
-        margin: 50px auto;
-        padding: 20px;
-        border-radius: 8px;
+    .Register-box {
         display: none;
     }
 
-    .Add-Task{
-        background-color: #f4f4f4;
-        width: 600px;
-        margin: 50px auto;
-        padding: 20px;
-        border-radius: 8px;
+    .dashboard-box {
+        background-color: var(--notion-sidebar);
+        width: 640px;
+        margin: 20px auto;
+        padding: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--notion-border);
         display: none;
     }
 
+    #userNameDisplay {
+        font-size: 14px;
+        color: var(--notion-muted);
+        display: block;
+        margin-bottom: 8px;
+    }
 
+    #dashboardText {
+        line-height: 1.8;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    #logout {
+        margin-top: 12px;
+    }
+
+    .Add-Task {
+        background-color: var(--notion-card);
+        width: 640px;
+        margin: 20px auto;
+        padding: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--notion-border);
+        display: none;
+    }
+
+    .Add-Task input, .Add-Task select {
+        margin-right: 6px;
+        margin-bottom: 10px;
+    }
+
+    #TaskDate {
+        display: none;
+    }
+
+    #TaskDateLabel {
+        font-size: 13px;
+        color: var(--notion-muted);
+    }
+
+    .taskList {
+        background-color: var(--notion-card);
+        width: 640px;
+        margin: 20px auto;
+        padding: 24px;
+        border-radius: 6px;
+        border: 1px solid var(--notion-border);
+        display: none;
+    }
+
+    .taskList select, .taskList textarea {
+        margin-bottom: 14px;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .taskList textarea {
+        height: 35px;
+        resize: none;
+        width: 250px;
+    }
+
+    #taskItems {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .task-card {
+        padding: 14px 16px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        border: 1px solid var(--notion-border);
+        background: var(--notion-card);
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .prio-HIGH {
+        background-color: var(--prio-high-bg);
+        border-color: var(--prio-high-border);
+    }
+
+    .prio-MEDIUM {
+        background-color: var(--prio-med-bg);
+        border-color: var(--prio-med-border);
+    }
+
+    .prio-LOW {
+        background-color: var(--prio-low-bg);
+        border-color: var(--prio-low-border);
+    }
+
+    #taskItems strong {
+        font-size: 15px;
+        color: var(--notion-text);
+    }
+
+    #taskItems button {
+        margin-right: 8px;
+        margin-top: 8px;
+    }
 </style>
 
-
-
-
-
-
 <body>
+<button class="theme-toggle-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark</button>
+
 <div class="login-box" id="login-box">
     <h2>Login</h2>
     <input type="text" id="username" placeholder="Username">
     <input type="password" id="password" placeholder="Password">
     <button onclick="loginUser()">Login</button>
-
+    <button onclick="registerUser()">Register</button>
+</div>
+<div class="Register-box" id="Register-box">
+    <h2>Register</h2>
+    <input type="text" id="regusername" placeholder="Username">
+    <input type="password" id="regpassword" placeholder="Password">
+    <input type="email" id="regemail" placeholder="Email">
+    <button onclick="register()">Register</button>
 </div>
 <div class="dashboard-box" id="dashboard-box">
     <h2>Dashboard</h2>
     <span id="userNameDisplay"></span>
     <h3 id="dashboardText"></h3>
+    <button onclick="Logout()" id="logout">Logout</button>
 </div>
 <div class="Add-Task" id="Add-Task">
     <input type="text" id="TaskName" placeholder="Task name: ">
     <input type="text" id="Desc" placeholder="Task description: ">
-    <select id="TaskType">
+    <select onchange="toggleDateField()" id="TaskType">
         <option value="NORMAL">NORMAL</option>
         <option value="DEADLINE">DEADLINE</option>
     </select>
     <select id="Status">
-        <option value="true">true</option>
-        <option value="false">false</option>
+        <option value="true">DONE</option>
+        <option value="false">UNDONE</option>
     </select>
     <select id="PRIORITY">
-        <option id="HIGH" value="HIGH">HIGH</option>
-        <option id="MEDIUM" value="MEDIUM">MEDIUM</option>
-        <option id="LOW" value="LOW" >LOW</option>
+        <option value="HIGH">HIGH</option>
+        <option value="MEDIUM">MEDIUM</option>
+        <option value="LOW" >LOW</option>
     </select>
     <select id="Kategorie">
-        <option id="WORK" value="WORK">WORK</option>
-        <option id="PERSONAL" value="PERSONAL">PERSONAL</option>
-        <option id="SCHOOL" value="SCHOOL" >SCHOOL</option>
+        <option value="WORK">WORK</option>
+        <option value="PERSONAL">PERSONAL</option>
+        <option value="SCHOOL" >SCHOOL</option>
     </select>
-    <label for="TaskDate">Only DeadlineTask: </label>
+    <br>
+    <label for="TaskDate" id="TaskDateLabel">Only DeadlineTask: </label>
     <input type="date" id="TaskDate" placeholder="Till when ?"
-    min="">
+           min="">
     <h4 id="successfull"></h4>
     <button onclick="addTask()">Add Task</button>
 </div>
 
-
-
-
-
-
+<div class="taskList" id="taskList">
+    <select id="TaskFilter" onchange="filterTasks()">
+        <option value="All">All</option>
+        <option value="Timeline">Timeline</option>
+        <option value="Alphabetical">Alphabetical</option>
+        <option value="true">Closed</option>
+        <option value="false">Open</option>
+    </select>
+    <input id="TaskSearch" oninput="tasksearch()" placeholder="Search Task: "></input>
+    <h3 id="Tasks">Tasks</h3>
+    <div id="taskItems"></div>
+</div>
 
 <script>
-    const heute = new Date();
+    // Theme-Verwaltung (Light / Dark)
+    function applySavedTheme() {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+            document.body.classList.add("dark-mode");
+            document.getElementById("themeBtn").innerText = "☀️ Light";
+        } else {
+            document.body.classList.remove("dark-mode");
+            document.getElementById("themeBtn").innerText = "🌙 Dark";
+        }
+    }
+    applySavedTheme();
 
+    function toggleTheme() {
+        document.body.classList.toggle("dark-mode");
+        const isDark = document.body.classList.contains("dark-mode");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        document.getElementById("themeBtn").innerText = isDark ? "☀️ Light" : "🌙 Dark";
+    }
+
+    const heute = new Date();
     const year = String(heute.getFullYear());
     const month = String(heute.getMonth()+1).padStart(2, '0');
     const day = String(heute.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
 
-    const datumsString = `${year}-${month}-${day}`;
+    document.getElementById("TaskDate").min = dateString;
 
-    document.getElementById("TaskDate").min = datumsString;
     function addTask(){
         let TN = document.getElementById("TaskName").value;
         let desc = document.getElementById("Desc").value;
@@ -112,66 +429,242 @@
         let priority = document.getElementById("PRIORITY").value;
         let kategorie = document.getElementById("Kategorie").value;
         let Tasktype = document.getElementById("TaskType").value;
-        let id = sessionStorage.getItem("userId")
+        let id = sessionStorage.getItem("userId");
         let date = document.getElementById("TaskDate").value;
-        let TaskData = {title: TN ,description: desc,task_type:Tasktype,done: status,date:date, priority: priority,kategorie:kategorie}
+        let TaskData = {title: TN, description: desc, task_type: Tasktype, done: status, date: date, prio: priority, kat: kategorie};
+
         fetch("http://localhost:8080/api/tasks/add", {
             method: "POST",
             headers: {
-                "User-Id":id,
+                "User-Id": id,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(TaskData)
         }).then(response => {
             if (response.status === 200) {
                 document.getElementById("successfull").innerText = "Task Added";
+                refreshDashboard();
+                refreshAllTasks();
             } else {
                 document.getElementById("successfull").innerText = "Something went wrong";
             }
-        })
+        });
     }
 
-function loginUser(){
-    let user = document.getElementById("username").value;
-    let pass = document.getElementById("password").value;
-    let loginData = {username: user,password: pass}
-    fetch("http://localhost:8080/api/users/login", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: JSON.stringify(loginData)
-    }).then(response => {
-        if (response.status === 200) {
-            document.getElementById("login-box").style.display = "none";
-            console.log("Login successfully");
-            document.getElementById("dashboard-box").style.display = "block";
-            document.getElementById("Add-Task").style.display = "block";
-            response.json().then(data => {
-                document.getElementById("userNameDisplay").innerText = "Hello, " + data.username
-                sessionStorage.setItem("userId", data.id);
+    function loginUser(){
+        let user = document.getElementById("username").value;
+        let pass = document.getElementById("password").value;
+        let loginData = {username: user, password: pass};
+        fetch("http://localhost:8080/api/users/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(loginData)
+        }).then(response => {
+            if (response.status === 200) {
+                document.getElementById("login-box").style.display = "none";
+                document.getElementById("dashboard-box").style.display = "block";
+                document.getElementById("Add-Task").style.display = "block";
+                response.json().then(data => {
+                    sessionStorage.setItem("userId", data.id);
+                    document.getElementById("userNameDisplay").innerText = "Hello, " + data.username;
+                    refreshDashboard();
+                    document.getElementById("taskList").style.display = "block";
+                    refreshAllTasks();
+                });
+            } else if (response.status === 401) {
+                console.log("Login failed");
+            }
+        });
+    }
 
-            dashboardUser(data.id).then(dashboardData => {
-                document.getElementById("dashboardText").innerHTML = "Total Tasks: " + dashboardData["Total Tasks"] +
-                    '<br>' + "Completed: " + dashboardData["Completed"] + '<br>' + "Open: " + dashboardData["Open"]
-                    + '<br>' + "OVERDUE: " + dashboardData["OVERDUE"];
-            })
-        })
-        } else if (response.status === 401) {
-        console.log("Login failed");
-        }
-    });
-}
     function dashboardUser(id){
-
         return fetch("http://localhost:8080/api/tasks/dashboard", {
-            method:"GET",
+            method: "GET",
             headers: {
                 "User-Id": id
             }
         }).then(response => response.json());
     }
 
+    function getAllTasks(){
+        let id = sessionStorage.getItem("userId");
+        return fetch("http://localhost:8080/api/tasks/getalltasks", {
+            method: "GET",
+            headers: {
+                "User-Id": id
+            }
+        }).then(response => response.json());
+    }
+
+    function refreshDashboard(){
+        let id = sessionStorage.getItem("userId");
+        dashboardUser(id).then(dashboardData => {
+            document.getElementById("dashboardText").innerHTML = "Total Tasks: " + dashboardData["Total Tasks"] +
+                '<br>' + "Completed: " + dashboardData["Completed"] + '<br>' + "Open: " + dashboardData["Open"]
+                + '<br>' + "OVERDUE: " + dashboardData["OVERDUE"];
+        });
+    }
+
+    function refreshAllTasks(){
+        getAllTasks().then(allTasksData => {
+            renderTask(allTasksData);
+        });
+    }
+
+    function deleteTask(id){
+        fetch("http://localhost:8080/api/tasks/" + id, {
+            method: "DELETE"
+        }).then(response => {
+            if (response.status === 200) {
+                refreshAllTasks();
+                refreshDashboard();
+            }
+        });
+    }
+
+    function markAsDoneUndone(id) {
+        if (document.getElementById("Status"))
+            markAsUndone(id);
+        if (!document.getElementById("Status"))
+            markAsDone(id);
+    }
+
+    function markAsUndone(id) {
+        fetch("http://localhost:8080/api/tasks/" + id + "/undone", {
+            method: "PUT",
+        }).then(response => {
+            if (response.status === 200) {
+                refreshAllTasks();
+                refreshDashboard();
+            }
+        });
+    }
+    function markAsDone(id){
+        fetch("http://localhost:8080/api/tasks/"+ id + "/done" , {
+            method : "PUT",
+        }).then(response => {
+                if (response.status === 200) {
+                    refreshAllTasks();
+                    refreshDashboard();
+                }
+            }
+        )}
+    function renderTask(tasklist){
+        let taskItems = ""
+        let doneundone = true
+        tasklist.forEach(function(currentValue) {
+
+            if (!currentValue.done)
+                doneundone = "undone"
+            else doneundone = "done"
+            taskItems += `<div class="task-card prio-${currentValue.prio}">`;
+            taskItems += "<strong>Task: " + currentValue.title + "</strong><br>";
+            taskItems += "Task Description: " + currentValue.description + "<br>";
+            taskItems += "Task Status: " + doneundone + "<br>"
+            taskItems += "Task Priority: " + currentValue.prio + "<br>"
+            taskItems += "Task Kategorie: " + currentValue.kat + "<br>"
+
+            if(currentValue.date) {
+                taskItems += "Date: " + currentValue.date + "<br>"
+            }
+            taskItems += `<button onclick="deleteTask('${currentValue.id}')">Delete</button>`;
+            taskItems += `<button onclick="markAsDoneUndone('${currentValue.id}')">Toggle Done</button>`;
+            taskItems += "</div>"
+
+        });
+        document.getElementById("taskItems").innerHTML = taskItems;
+    }
+    function filterTasks() {
+        let id = sessionStorage.getItem("userId");
+        if (document.getElementById("TaskFilter").value === "All") {
+            refreshAllTasks()
+        }
+        if (document.getElementById("TaskFilter").value === "Timeline") {
+            fetch("http://localhost:8080/api/tasks/sortdeadlinetask",{
+                method: "GET",
+                headers:{
+                    "User-Id": id
+                }
+            }).then((response) => response.json()).then(data => renderTask(data))
+        }
+        if (document.getElementById("TaskFilter").value === "true") {
+            fetch("http://localhost:8080/api/tasks/filter?status=true", {
+                method: "GET",
+                headers: {
+                    "user-id": id
+                }
+            }).then((response) => response.json()).then(data => renderTask(data))
+        }
+        if (document.getElementById("TaskFilter").value === "false") {
+            fetch("http://localhost:8080/api/tasks/filter?status=false", {
+                method: "GET",
+                headers: {
+                    "user-id": id
+                }
+            }).then((response) => response.json()).then(data => renderTask(data))
+        }
+        if (document.getElementById("TaskFilter").value === "Alphabetical") {
+            fetch("http://localhost:8080/api/tasks/sortTask", {
+                method: "GET",
+                headers: {
+                    "user-id": id
+                }
+            }).then((response) => response.json()).then(data => renderTask(data))
+        }
+    }
+    function tasksearch(){
+        let id = sessionStorage.getItem("userId");
+        if (!document.getElementById("TaskSearch").value) {
+            refreshAllTasks()
+        } else {
+            fetch("http://localhost:8080/api/tasks/search?keyword=" + document.getElementById("TaskSearch").value, {
+                method: "GET",
+                headers: {
+                    "User-Id": id
+                }
+            }).then((response) => response.json()).then(data => renderTask(data))
+        }
+    }
+    function toggleDateField(){
+        if (document.getElementById("TaskType").value === "DEADLINE"){
+            document.getElementById("TaskDate").style.display = "inline-block"
+        } else if (document.getElementById("TaskType").value === "NORMAL"){
+            document.getElementById("TaskDate").style.display = "none"
+        }
+    }
+    function Logout() {
+        sessionStorage.removeItem("userId");
+        document.getElementById("login-box").style.display = "block";
+        document.getElementById("dashboard-box").style.display = "none";
+        document.getElementById("Add-Task").style.display = "none";
+        document.getElementById("taskList").style.display = "none";
+        document.getElementById("username").value = "";
+        document.getElementById("password").value = "";
+    }
+    function registerUser(){
+        document.getElementById("login-box").style.display = "none";
+        document.getElementById("Register-box").style.display = "block";
+    }
+    function register(){
+        let user = document.getElementById("regusername").value;
+        let pass = document.getElementById("regpassword").value;
+        let email = document.getElementById("regemail").value;
+        let RegisterData = {username: user,email:email ,password:pass};
+        fetch("http://localhost:8080/api/users/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(RegisterData)
+        }).then(response => {
+            if (response.status === 200) {
+                document.getElementById("Register-box").style.display = "none";
+                document.getElementById("login-box").style.display = "block";
+            } else {console.log("nicht so lecka")}
+        })
+    }
 </script>
 </body>
 </html>

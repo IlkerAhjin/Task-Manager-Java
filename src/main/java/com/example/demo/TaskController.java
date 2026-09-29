@@ -11,7 +11,7 @@ import java.util.Map;
 public class TaskController {
     private TaskDAO taskDAO = new TaskDAO();
 
-    @GetMapping
+    @GetMapping("/getalltasks")
     public List<Task> getAllTasks(@RequestHeader("User-Id") int userId) {
         return taskDAO.showAllTasks(userId);
     }
