@@ -17,12 +17,6 @@ public class DeadlineTask extends Task {
     public LocalDate getDate() {
         return date;
     }
-    @Override
-    public void showTask() {
-        super.showTask();
-        System.out.println("Date: " + date);
-        if (this.isOverdue()) {
-            System.out.println("*** [OVERDUE] ***"); }
-    }
+
 }
 

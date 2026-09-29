@@ -36,14 +36,6 @@ public class Task {
         return id;
     }
 
-    public void showTask(){
-        System.out.println("Your task: "+title);
-        System.out.println("Description:  "+description);
-        System.out.println("Status: "+ (done ? "done" : "undone"));
-        System.out.println("Id: "+id+".");
-        System.out.println("Prio: "+prio);
-        System.out.println("Kat: "+kat);
-    }
     public String getTitle() {
         return title;
     }

@@ -246,14 +246,12 @@ public class TaskDAO {
             dt.setId(rs.getInt("id"));
             dt.setPrio(Task.Priority.valueOf(rs.getString("priority")));
             dt.setKat(Task.Kategorie.valueOf(rs.getString("kategorie")));
-            dt.showTask();
             return dt;
         } else {
             Task tk = new Task(rs.getString("title"), rs.getString("description"), rs.getBoolean("is_done"));
             tk.setId(rs.getInt("id"));
             tk.setPrio(Task.Priority.valueOf(rs.getString("priority")));
             tk.setKat(Task.Kategorie.valueOf(rs.getString("kategorie")));
-            tk.showTask();
             return tk;
         }
     }

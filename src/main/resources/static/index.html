@@ -65,7 +65,7 @@
         border: 1px solid rgba(46, 124, 86, 0.25);
     }
 
-    .task-priority-high,
+
     .priority-high {
         background: rgba(239, 68, 68, 0.12);
         border-left: 4px solid rgba(239, 68, 68, 0.6);
@@ -76,7 +76,7 @@
         -webkit-backdrop-filter: blur(8px);
     }
 
-    .task-priority-medium,
+
     .priority-medium {
         background: rgba(245, 158, 11, 0.12);
         border-left: 4px solid rgba(245, 158, 11, 0.6);
@@ -87,7 +87,7 @@
         -webkit-backdrop-filter: blur(8px);
     }
 
-    .task-priority-low,
+
     .priority-low {
         background: rgba(59, 130, 246, 0.12);
         border-left: 4px solid rgba(59, 130, 246, 0.6);
@@ -344,6 +344,7 @@
     <input type="password" id="regpassword" placeholder="Password">
     <input type="email" id="regemail" placeholder="Email">
     <button onclick="register()">Register</button>
+    <button onclick="backtologin()">Back to Login</button>
 </div>
 <div class="dashboard-box" id="dashboard-box">
     <h2>Dashboard</h2>
@@ -394,7 +395,16 @@
 </div>
 
 <script>
-    // Theme-Verwaltung (Light / Dark)
+    if (localStorage.getItem('userId')) {
+        document.getElementById("login-box").style.display = "none";
+        document.getElementById("dashboard-box").style.display = "block";
+        document.getElementById("Add-Task").style.display = "block";
+        document.getElementById("userNameDisplay").innerText = "Hello, " + localStorage.getItem("userName");
+        refreshDashboard();
+        document.getElementById("taskList").style.display = "block";
+        refreshAllTasks();
+    }
+    
     function applySavedTheme() {
         const savedTheme = localStorage.getItem("theme");
         if (savedTheme === "dark") {
@@ -429,7 +439,7 @@
         let priority = document.getElementById("PRIORITY").value;
         let kategorie = document.getElementById("Kategorie").value;
         let Tasktype = document.getElementById("TaskType").value;
-        let id = sessionStorage.getItem("userId");
+        let id = localStorage.getItem("userId");
         let date = document.getElementById("TaskDate").value;
         let TaskData = {title: TN, description: desc, task_type: Tasktype, done: status, date: date, prio: priority, kat: kategorie};
 
@@ -445,6 +455,14 @@
                 document.getElementById("successfull").innerText = "Task Added";
                 refreshDashboard();
                 refreshAllTasks();
+                document.getElementById("TaskName").value = "";
+                document.getElementById("Desc").value = "";
+                document.getElementById("Status").value = "false";
+                document.getElementById("TaskDate").value = "";
+                document.getElementById("Kategorie").value = "WORK";
+                document.getElementById("PRIORITY").value = "HIGH";
+                document.getElementById("TaskType").value = "NORMAL";
+                toggleDateField();
             } else {
                 document.getElementById("successfull").innerText = "Something went wrong";
             }
@@ -467,7 +485,8 @@
                 document.getElementById("dashboard-box").style.display = "block";
                 document.getElementById("Add-Task").style.display = "block";
                 response.json().then(data => {
-                    sessionStorage.setItem("userId", data.id);
+                    localStorage.setItem("userId", data.id);
+                    localStorage.setItem("userName", data.username);
                     document.getElementById("userNameDisplay").innerText = "Hello, " + data.username;
                     refreshDashboard();
                     document.getElementById("taskList").style.display = "block";
@@ -477,7 +496,7 @@
                 console.log("Login failed");
             }
         });
-    }
+        }
 
     function dashboardUser(id){
         return fetch("http://localhost:8080/api/tasks/dashboard", {
@@ -489,7 +508,7 @@
     }
 
     function getAllTasks(){
-        let id = sessionStorage.getItem("userId");
+        let id = localStorage.getItem("userId");
         return fetch("http://localhost:8080/api/tasks/getalltasks", {
             method: "GET",
             headers: {
@@ -499,7 +518,7 @@
     }
 
     function refreshDashboard(){
-        let id = sessionStorage.getItem("userId");
+        let id = localStorage.getItem("userId");
         dashboardUser(id).then(dashboardData => {
             document.getElementById("dashboardText").innerHTML = "Total Tasks: " + dashboardData["Total Tasks"] +
                 '<br>' + "Completed: " + dashboardData["Completed"] + '<br>' + "Open: " + dashboardData["Open"]
@@ -524,13 +543,13 @@
         });
     }
 
-    function markAsDoneUndone(id) {
-        if (document.getElementById("Status"))
+    function markAsDoneUndone(id, isDone) {
+        if (isDone) {
             markAsUndone(id);
-        if (!document.getElementById("Status"))
+        } else {
             markAsDone(id);
+        }
     }
-
     function markAsUndone(id) {
         fetch("http://localhost:8080/api/tasks/" + id + "/undone", {
             method: "PUT",
@@ -570,14 +589,14 @@
                 taskItems += "Date: " + currentValue.date + "<br>"
             }
             taskItems += `<button onclick="deleteTask('${currentValue.id}')">Delete</button>`;
-            taskItems += `<button onclick="markAsDoneUndone('${currentValue.id}')">Toggle Done</button>`;
+            taskItems += `<button onclick="markAsDoneUndone('${currentValue.id}', ${currentValue.done})">Toggle Done</button>`;
             taskItems += "</div>"
 
         });
         document.getElementById("taskItems").innerHTML = taskItems;
     }
     function filterTasks() {
-        let id = sessionStorage.getItem("userId");
+        let id = localStorage.getItem("userId");
         if (document.getElementById("TaskFilter").value === "All") {
             refreshAllTasks()
         }
@@ -593,7 +612,7 @@
             fetch("http://localhost:8080/api/tasks/filter?status=true", {
                 method: "GET",
                 headers: {
-                    "user-id": id
+                    "User-Id": id
                 }
             }).then((response) => response.json()).then(data => renderTask(data))
         }
@@ -601,7 +620,7 @@
             fetch("http://localhost:8080/api/tasks/filter?status=false", {
                 method: "GET",
                 headers: {
-                    "user-id": id
+                    "User-Id": id
                 }
             }).then((response) => response.json()).then(data => renderTask(data))
         }
@@ -609,13 +628,13 @@
             fetch("http://localhost:8080/api/tasks/sortTask", {
                 method: "GET",
                 headers: {
-                    "user-id": id
+                    "User-Id": id
                 }
             }).then((response) => response.json()).then(data => renderTask(data))
         }
     }
     function tasksearch(){
-        let id = sessionStorage.getItem("userId");
+        let id = localStorage.getItem("userId");
         if (!document.getElementById("TaskSearch").value) {
             refreshAllTasks()
         } else {
@@ -635,7 +654,8 @@
         }
     }
     function Logout() {
-        sessionStorage.removeItem("userId");
+        localStorage.removeItem("userId");
+        localStorage.removeItem("userName");
         document.getElementById("login-box").style.display = "block";
         document.getElementById("dashboard-box").style.display = "none";
         document.getElementById("Add-Task").style.display = "none";
@@ -664,6 +684,10 @@
                 document.getElementById("login-box").style.display = "block";
             } else {console.log("nicht so lecka")}
         })
+    }
+    function backtologin(){
+        document.getElementById("login-box").style.display = "block";
+        document.getElementById("Register-box").style.display = "none";
     }
 </script>
 </body>
