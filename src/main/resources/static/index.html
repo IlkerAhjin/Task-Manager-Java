@@ -41,14 +41,6 @@
         --prio-low-border: rgba(46, 124, 86, 0.45);
     }
 
-    .task-card {
-        padding: 14px 16px;
-        border-radius: 6px;
-        margin-bottom: 12px;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        transition: background-color 0.2s ease, border-color 0.2s ease;
-    }
 
     .prio-HIGH {
         background: rgba(235, 87, 87, 0.08);
@@ -293,13 +285,47 @@
         line-height: 1.6;
     }
 
+
+    #taskItems strong {
+        font-size: 15px;
+        color: var(--notion-text);
+    }
+
+    #taskItems button {
+        margin-right: 8px;
+        margin-top: 8px;
+    }
+
     .task-card {
+        position: relative;
         padding: 14px 16px;
         border-radius: 6px;
         margin-bottom: 12px;
         border: 1px solid var(--notion-border);
         background: var(--notion-card);
         transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    /* Das Checkmark-Icon oben rechts */
+    .task-checkmark {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        font-size: 16px;
+        color: #2e7c56; /* Notion-Grün */
+        background: rgba(46, 124, 86, 0.15);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+    }
+
+    /* Optional: Erledigte Aufgaben leicht ausgrauen */
+    .task-card.is-done {
+        opacity: 0.7;
     }
 
     .prio-HIGH {
@@ -315,16 +341,6 @@
     .prio-LOW {
         background-color: var(--prio-low-bg);
         border-color: var(--prio-low-border);
-    }
-
-    #taskItems strong {
-        font-size: 15px;
-        color: var(--notion-text);
-    }
-
-    #taskItems button {
-        margin-right: 8px;
-        margin-top: 8px;
     }
 </style>
 
@@ -570,28 +586,29 @@
                 }
             }
         )}
-    function renderTask(tasklist){
-        let taskItems = ""
-        let doneundone = true
-        tasklist.forEach(function(currentValue) {
 
-            if (!currentValue.done)
-                doneundone = "undone"
-            else doneundone = "done"
-            taskItems += `<div class="task-card prio-${currentValue.prio}">`;
+    function renderTask(tasklist){
+        let taskItems = "";
+        tasklist.forEach(function(currentValue) {
+            const isDone = (currentValue.done === true || currentValue.done === "true");
+            const doneundone = isDone ? "done" : "undone";
+            const doneClass = isDone ? "is-done" : "";
+            const checkmark = isDone ? '<span class="task-checkmark" title="Completed">✓</span>' : '';
+
+            taskItems += `<div class="task-card prio-${currentValue.prio} ${doneClass}">`;
+            taskItems += checkmark;
             taskItems += "<strong>Task: " + currentValue.title + "</strong><br>";
             taskItems += "Task Description: " + currentValue.description + "<br>";
-            taskItems += "Task Status: " + doneundone + "<br>"
-            taskItems += "Task Priority: " + currentValue.prio + "<br>"
-            taskItems += "Task Kategorie: " + currentValue.kat + "<br>"
+            taskItems += "Task Status: " + doneundone + "<br>";
+            taskItems += "Task Priority: " + currentValue.prio + "<br>";
+            taskItems += "Task Kategorie: " + currentValue.kat + "<br>";
 
             if(currentValue.date) {
-                taskItems += "Date: " + currentValue.date + "<br>"
+                taskItems += "Date: " + currentValue.date + "<br>";
             }
             taskItems += `<button onclick="deleteTask('${currentValue.id}')">Delete</button>`;
-            taskItems += `<button onclick="markAsDoneUndone('${currentValue.id}', ${currentValue.done})">Toggle Done</button>`;
-            taskItems += "</div>"
-
+            taskItems += `<button onclick="markAsDoneUndone('${currentValue.id}', ${isDone})">Toggle Done</button>`;
+            taskItems += "</div>";
         });
         document.getElementById("taskItems").innerHTML = taskItems;
     }
